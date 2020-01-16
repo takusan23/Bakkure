@@ -1,0 +1,58 @@
+{
+	"width": 1280,
+	"height": 720,
+	"fps": 30,
+	"main": "./script/_bootstrap.js",
+	"assets": {
+		"se": {
+			"type": "audio",
+			"path": "audio/se",
+			"systemId": "sound",
+			"duration": 250
+		},
+		"toomo": {
+			"type": "image",
+			"width": 75,
+			"height": 75,
+			"path": "image/toomo.png"
+		},
+		"main": {
+			"type": "script",
+			"path": "script/main.js",
+			"global": true
+		},
+		"parameterObject": {
+			"type": "script",
+			"path": "script/parameterObject.js",
+			"global": true
+		},
+		"_bootstrap": {
+			"type": "script",
+			"path": "script/_bootstrap.js",
+			"global": true
+		},
+		"irasutoya_kousya": {
+			"type": "image",
+			"width": 140,
+			"height": 86,
+			"path": "image/irasutoya_kousya.png"
+		},
+		"tuusinbo": {
+			"type": "image",
+			"width": 100,
+			"height": 56,
+			"path": "image/tuusinbo.png"
+		}
+	},
+	"environment": {
+		"sandbox-runtime": "2",
+		"niconico": {
+			"supportedModes": [
+				"ranking"
+			],
+			"preferredSessionParameters": {
+				"totalTimeLimit": 65
+			}
+		}
+	}
+}
