@@ -7,11 +7,17 @@ let player: g.Sprite
 // スコア表示ラベル
 let scoreLabel: g.Label
 
+// カラオケモード
+let isKaraokeMode = false
+let karaokeLabel: g.Label
+let karaokeCount = 10
+let karaokeInterval: g.TimerIdentifier
+
 export function main(param: GameMainParameterObject): void {
 	const scene = new g.Scene({
 		game: g.game,
 		// このシーンで利用するアセットのIDを列挙し、シーンに通知します
-		assetIds: ["toomo", "irasutoya_kousya", "bakkure_1", "karaoke", "tuusinbo", "se"]
+		assetIds: ["toomo", "irasutoya_kousya", "bakkure_1", "karaoke", "karaoke_2", "tuusinbo", "old_toomo", "doutei_toomo", "inu", "se"]
 	})
 	let time = 60 // 制限時間
 	if (param.sessionParameter.totalTimeLimit) {
@@ -36,6 +42,17 @@ export function main(param: GameMainParameterObject): void {
 
 		// プレイヤー追加
 		scene.append(player)
+
+		// 移動できるように
+		scene.pointMoveCapture.add((event) => {
+			const pos = player.y
+			player.y += event.prevDelta.y
+			// 範囲外に行かないように
+			if (player.y >= (g.game.height - 100) || player.y <= 10) {
+				player.y = pos
+			}
+			player.modified()
+		})
 
 		// player.update.add(() => {
 		// 	// 毎フレームでY座標を再計算し、プレイヤーの飛んでいる動きを表現します
@@ -74,16 +91,17 @@ export function main(param: GameMainParameterObject): void {
 		})
 		scene.append(timeLabel)
 
-		// 移動できるように
-		scene.pointMoveCapture.add((event) => {
-			const pos = player.y
-			player.y += event.prevDelta.y
-			// 範囲外に行かないように
-			if (player.y >= (g.game.height - 100) || player.y <= 10) {
-				player.y = pos
-			}
-			player.modified()
+		// カラオケモード
+		karaokeLabel = new g.Label({
+			scene: scene,
+			text: "",
+			font: font,
+			fontSize: font.size / 2,
+			textColor: "black",
+			x: 0.7 * g.game.width,
+			y: 0.05 * g.game.height
 		})
+		scene.append(karaokeLabel)
 
 		// スクーリング（減点）追加
 		scene.setInterval(() => {
@@ -92,32 +110,82 @@ export function main(param: GameMainParameterObject): void {
 				const kousya = createItem("irasutoya_kousya")
 				scene.append(kousya)
 				// 流す
-				setItem({ item: kousya, point: -50 })
+				setItem({ item: kousya, point: -100 })
+			}
+		}, 400)
 
-				// 通知表生成
+		scene.setInterval(() => {
+			// 通知表生成
+			if (time > 0) {
 				const tsuusinbo = createItem("tuusinbo")
 				scene.append(tsuusinbo)
 				setItem({ item: tsuusinbo, point: 50 })
+			}
+		}, g.game.random.get(500, 1000))
 
-				// カラオケ作成
-				const karaoke = createItem("karaoke")
+		// scene.setInterval(() => {
+		// 	// カラオケ作成
+		// 	if (time > 0) {
+		// 		const karaoke = createItem("karaoke")
+		// 		scene.append(karaoke)
+		// 		setItem({ item: karaoke, point: 100, speed: 20 })
+		// 	}
+		// }, g.game.random.get(500, 1000))
+
+		scene.setInterval(() => {
+			// カラオケ作成
+			if (time > 0) {
+				const karaoke = createItem("karaoke_2")
 				scene.append(karaoke)
-				setItem({ item: karaoke, point: 50 })
+				initKaraoke({ item: karaoke })
+			}
+		}, g.game.random.get(2000, 3000))
 
-				// スクーリング行ってない
+		scene.setInterval(() => {
+			// スクーリング行ってない
+			if (time > 0) {
 				const schoolingBakkure = createItem("bakkure_1")
 				scene.append(schoolingBakkure)
 				setItem({ item: schoolingBakkure, point: 200 })
-
-				if (time <= 20) {
-					// 残り20秒で令和2020年を表示する
-					// 令和2020年 元ネタ：https://www.youtube.com/watch?v=7Qry4qTFiIM 令和2020年はバックレません
-					const reiwa = createReiwa2020()
-					scene.append(reiwa)
-					setItem({ item: reiwa, point: 2020, speed: 100 })
-				}
 			}
-		}, 1000)
+		}, g.game.random.get(500, 1000))
+
+		scene.setInterval(() => {
+			if (time <= 20) {
+				// 残り20秒で令和2020年を表示する
+				// 令和2020年 元ネタ：https://www.youtube.com/watch?v=7Qry4qTFiIM 令和2020年はバックレません
+				const reiwa = createReiwa2020()
+				scene.append(reiwa)
+				setItem({ item: reiwa, point: 2020, speed: 100 })
+			}
+		}, g.game.random.get(1000, 3000))
+
+		scene.setInterval(() => {
+			// 前のトーモ作成
+			if (time > 0) {
+				const oldToomo = createItem("old_toomo")
+				scene.append(oldToomo)
+				setItem({ item: oldToomo, point: 50 })
+			}
+		}, g.game.random.get(1000, 3000))
+
+		scene.setInterval(() => {
+			// 童貞とーも
+			if (time > 0) {
+				const doutei = createItem("doutei_toomo")
+				scene.append(doutei)
+				setItem({ item: doutei, point: 100 })
+			}
+		}, g.game.random.get(1000, 3000))
+
+		scene.setInterval(() => {
+			// レモン
+			if (time > 0) {
+				const remon = createItem("inu")
+				scene.append(remon)
+				setItem({ item: remon, point: 200 })
+			}
+		}, g.game.random.get(1000, 3000))
 
 		// // 画面をタッチしたとき、SEを鳴らします
 		// scene.pointDownCapture.add(() => {
@@ -175,7 +243,11 @@ export function main(param: GameMainParameterObject): void {
 	})
 	g.game.pushScene(scene)
 
-	// 障害物生成関数。引数は画像の名前。
+	/**
+	 * 障害物生成関数。
+	 * 重要 : assetIdsに追加する必要があります。
+	 * @param path assetIdsで追加した名前
+	 */
 	const createItem = (path: string): g.Sprite => {
 		// 生成
 		const item = new g.Sprite({
@@ -206,7 +278,12 @@ export function main(param: GameMainParameterObject): void {
 		return reiwa
 	}
 
-	// 障害物を流す、範囲外に行ったら消す、プレイヤーと当たったときの処理。
+	/**
+	 * オブジェクトを動かす、当たったらポイント加算　など共通するものをまとめた関数。
+	 * @param item オブジェクト。画像など。
+	 * @param speed 移動速度。デフォ10。
+	 * @param point 当たったときの加算。マイナスでもいいよ。
+	 */
 	const setItem = (obj: {
 		item: g.E,
 		speed?: number,
@@ -231,6 +308,49 @@ export function main(param: GameMainParameterObject): void {
 			// 更新
 			obj.item.modified()
 		})
+	}
+
+	const initKaraoke = (obj: { item: g.E }) => {
+		const update = () => {
+			obj.item.x -= 20
+			if (obj.item.x < -100) {
+				// 範囲外に行ったら消す
+				obj.item.destroy()
+			}
+			// プレイヤーと当たったら
+			if (g.Collision.intersectAreas(obj.item, player)) {
+				// 初回時のみ実行しない
+				if (karaokeInterval !== undefined) { scene.clearInterval(karaokeInterval) }
+				// カラオケモード
+				isKaraokeMode = true
+				// カウンター初期化
+				karaokeCount = 10
+				// テキストも初期化
+				karaokeLabel.text = `10`
+				karaokeLabel.invalidate()
+
+				// カウントダウン
+				karaokeInterval = scene.setInterval(() => {
+					if (karaokeCount === 0) { scene.clearInterval(karaokeInterval) }
+					karaokeCount--
+					karaokeLabel.text = `${karaokeCount}`
+					if (karaokeCount === 0) {
+						// 0になったら白紙へ
+						karaokeLabel.text = ""
+						isKaraokeMode = false
+					}
+					karaokeLabel.invalidate()
+				}, 1000)
+
+				// 障害物を消す
+				obj.item.destroy()
+				// update.add 消す。
+				obj.item.update.remove(update)
+			}
+			// 更新
+			obj.item.modified()
+		}
+		obj.item.update.add(update)
 	}
 
 }

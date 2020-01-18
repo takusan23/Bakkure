@@ -43,24 +43,6 @@
 			"height": 56,
 			"path": "image/tuusinbo.png"
 		},
-		"irasutoya_karaoke": {
-			"type": "image",
-			"width": 80,
-			"height": 82,
-			"path": "image/irasutoya_karaoke.png"
-		},
-		"irasutoya_report": {
-			"type": "image",
-			"width": 60,
-			"height": 67,
-			"path": "image/irasutoya_report.png"
-		},
-		"irasutoya_taigaku": {
-			"type": "image",
-			"width": 100,
-			"height": 100,
-			"path": "image/irasutoya_taigaku.png"
-		},
 		"karaoke": {
 			"type": "image",
 			"width": 100,
@@ -69,15 +51,33 @@
 		},
 		"bakkure_1": {
 			"type": "image",
-			"width": 100,
-			"height": 101,
+			"width": 50,
+			"height": 50,
 			"path": "image/bakkure_1.png"
 		},
-		"karaoke_5": {
+		"karaoke_2": {
 			"type": "image",
-			"width": 250,
-			"height": 182,
-			"path": "image/karaoke_5.png"
+			"width": 100,
+			"height": 72,
+			"path": "image/karaoke_2.png"
+		},
+		"old_toomo": {
+			"type": "image",
+			"width": 100,
+			"height": 81,
+			"path": "image/old_toomo.png"
+		},
+		"doutei_toomo": {
+			"type": "image",
+			"width": 100,
+			"height": 56,
+			"path": "image/doutei_toomo.png"
+		},
+		"inu": {
+			"type": "image",
+			"width": 100,
+			"height": 83,
+			"path": "image/inu.png"
 		}
 	},
 	"environment": {
