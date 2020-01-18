@@ -17,7 +17,7 @@ export function main(param: GameMainParameterObject): void {
 	const scene = new g.Scene({
 		game: g.game,
 		// このシーンで利用するアセットのIDを列挙し、シーンに通知します
-		assetIds: ["toomo", "irasutoya_kousya", "bakkure_1", "karaoke", "karaoke_2", "tuusinbo", "old_toomo", "doutei_toomo", "inu", "se"]
+		assetIds: ["toomo", "irasutoya_kousya", "bakkure_1", "karaoke", "karaoke_2", "tuusinbo", "old_toomo", "doutei_toomo", "inu", "adhd"]
 	})
 	let time = 60 // 制限時間
 	if (param.sessionParameter.totalTimeLimit) {
@@ -105,7 +105,7 @@ export function main(param: GameMainParameterObject): void {
 
 		// スクーリング（減点）追加
 		scene.setInterval(() => {
-			if (time > 0) {
+			if (time > 0 && !isKaraokeMode) {
 				// スクーリング生成
 				const kousya = createItem("irasutoya_kousya")
 				scene.append(kousya)
@@ -135,11 +135,11 @@ export function main(param: GameMainParameterObject): void {
 		scene.setInterval(() => {
 			// カラオケ作成
 			if (time > 0) {
-				const karaoke = createItem("karaoke_2")
+				const karaoke = createItem("karaoke_2", "schooling")
 				scene.append(karaoke)
 				initKaraoke({ item: karaoke })
 			}
-		}, g.game.random.get(2000, 3000))
+		}, g.game.random.get(5000, 10000))
 
 		scene.setInterval(() => {
 			// スクーリング行ってない
@@ -151,7 +151,7 @@ export function main(param: GameMainParameterObject): void {
 		}, g.game.random.get(500, 1000))
 
 		scene.setInterval(() => {
-			if (time <= 20) {
+			if (time <= 20 && time > 0) {
 				// 残り20秒で令和2020年を表示する
 				// 令和2020年 元ネタ：https://www.youtube.com/watch?v=7Qry4qTFiIM 令和2020年はバックレません
 				const reiwa = createReiwa2020()
@@ -247,13 +247,15 @@ export function main(param: GameMainParameterObject): void {
 	 * 障害物生成関数。
 	 * 重要 : assetIdsに追加する必要があります。
 	 * @param path assetIdsで追加した名前
+	 * @param tag 将来的に使いそう。
 	 */
-	const createItem = (path: string): g.Sprite => {
+	const createItem = (path: string, tag: string = ""): g.Sprite => {
 		// 生成
 		const item = new g.Sprite({
 			scene: scene,
 			src: scene.assets[path],
-			x: g.game.width
+			x: g.game.width,
+			tag: tag
 		})
 		item.y = g.game.random.get(1, g.game.height) // 高さランダム
 		return item
@@ -299,9 +301,14 @@ export function main(param: GameMainParameterObject): void {
 			// プレイヤーと当たったら
 			if (g.Collision.intersectAreas(obj.item, player)) {
 				// 加算
-				g.game.vars.gameState.score += obj.point
-				scoreLabel.text = "スコア : " + g.game.vars.gameState.score
-				scoreLabel.invalidate()
+				if ((g.game.vars.gameState.score + obj.point) >= 0) {
+					// 0 以上にする
+					g.game.vars.gameState.score += obj.point
+					scoreLabel.text = "スコア : " + g.game.vars.gameState.score
+					scoreLabel.invalidate()
+				}
+				// 音鳴らす
+				(scene.assets["adhd"] as g.AudioAsset).play()
 				// 障害物を消す
 				obj.item.destroy()
 			}
@@ -326,15 +333,15 @@ export function main(param: GameMainParameterObject): void {
 				// カウンター初期化
 				karaokeCount = 10
 				// テキストも初期化
-				karaokeLabel.text = `10`
+				karaokeLabel.text = `カラオケタイム：残り 10秒`
 				karaokeLabel.invalidate()
 
 				// カウントダウン
 				karaokeInterval = scene.setInterval(() => {
 					if (karaokeCount === 0) { scene.clearInterval(karaokeInterval) }
 					karaokeCount--
-					karaokeLabel.text = `${karaokeCount}`
-					if (karaokeCount === 0) {
+					karaokeLabel.text = `カラオケタイム：残り ${karaokeCount}秒`
+					if (karaokeCount <= 0) {
 						// 0になったら白紙へ
 						karaokeLabel.text = ""
 						isKaraokeMode = false
@@ -345,7 +352,9 @@ export function main(param: GameMainParameterObject): void {
 				// 障害物を消す
 				obj.item.destroy()
 				// update.add 消す。
-				obj.item.update.remove(update)
+				if (obj.item.update !== undefined) {
+					obj.item.update.removeAll()
+				}
 			}
 			// 更新
 			obj.item.modified()

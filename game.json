@@ -4,12 +4,6 @@
 	"fps": 30,
 	"main": "./script/_bootstrap.js",
 	"assets": {
-		"se": {
-			"type": "audio",
-			"path": "audio/se",
-			"systemId": "sound",
-			"duration": 250
-		},
 		"toomo": {
 			"type": "image",
 			"width": 75,
@@ -78,6 +72,66 @@
 			"width": 100,
 			"height": 83,
 			"path": "image/inu.png"
+		},
+		"adhd": {
+			"type": "audio",
+			"path": "audio/adhd",
+			"systemId": "sound",
+			"duration": 1417
+		},
+		"doumo_toomo": {
+			"type": "audio",
+			"path": "audio/doumo_toomo",
+			"systemId": "sound",
+			"duration": 1045
+		},
+		"gogo_no_zyugyou": {
+			"type": "audio",
+			"path": "audio/gogo_no_zyugyou",
+			"systemId": "sound",
+			"duration": 1742
+		},
+		"hattastu_syougai": {
+			"type": "audio",
+			"path": "audio/hattastu_syougai",
+			"systemId": "sound",
+			"duration": 2044
+		},
+		"karaoke_ikuka": {
+			"type": "audio",
+			"path": "audio/karaoke_ikuka",
+			"systemId": "sound",
+			"duration": 1672
+		},
+		"katsudon_channel": {
+			"type": "audio",
+			"path": "audio/katsudon_channel",
+			"systemId": "sound",
+			"duration": 3158
+		},
+		"korean": {
+			"type": "audio",
+			"path": "audio/korean",
+			"systemId": "sound",
+			"duration": 3785
+		},
+		"n_kou_taigaku": {
+			"type": "audio",
+			"path": "audio/n_kou_taigaku",
+			"systemId": "sound",
+			"duration": 2740
+		},
+		"san_ryuunen": {
+			"type": "audio",
+			"path": "audio/san_ryuunen",
+			"systemId": "sound",
+			"duration": 2601
+		},
+		"teacher_block": {
+			"type": "audio",
+			"path": "audio/teacher_block",
+			"systemId": "sound",
+			"duration": 4110
 		}
 	},
 	"environment": {
