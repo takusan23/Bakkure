@@ -11,7 +11,7 @@ export function main(param: GameMainParameterObject): void {
 	const scene = new g.Scene({
 		game: g.game,
 		// このシーンで利用するアセットのIDを列挙し、シーンに通知します
-		assetIds: ["toomo", "irasutoya_kousya", "tuusinbo", "se"]
+		assetIds: ["toomo", "irasutoya_kousya", "bakkure_1", "karaoke", "tuusinbo", "se"]
 	})
 	let time = 60 // 制限時間
 	if (param.sessionParameter.totalTimeLimit) {
@@ -46,7 +46,6 @@ export function main(param: GameMainParameterObject): void {
 		// 	player.modified();
 		// });
 
-
 		// フォントの生成
 		const font = new g.DynamicFont({
 			game: g.game,
@@ -57,7 +56,7 @@ export function main(param: GameMainParameterObject): void {
 		// スコア表示用のラベル
 		scoreLabel = new g.Label({
 			scene: scene,
-			text: "SCORE: 0",
+			text: "スコア : 0",
 			font: font,
 			fontSize: font.size / 2,
 			textColor: "black"
@@ -67,7 +66,7 @@ export function main(param: GameMainParameterObject): void {
 		// 残り時間表示用ラベル
 		const timeLabel = new g.Label({
 			scene: scene,
-			text: "TIME: 0",
+			text: "時間 : 0",
 			font: font,
 			fontSize: font.size / 2,
 			textColor: "black",
@@ -86,28 +85,39 @@ export function main(param: GameMainParameterObject): void {
 			player.modified()
 		})
 
-
 		// スクーリング（減点）追加
 		scene.setInterval(() => {
 			if (time > 0) {
 				// スクーリング生成
-				const kousya = createSchooling()
+				const kousya = createItem("irasutoya_kousya")
 				scene.append(kousya)
 				// 流す
-				setItem(kousya, -10)
+				setItem({ item: kousya, point: -50 })
 
 				// 通知表生成
-				const tsuusinbo = createTsusinbo()
+				const tsuusinbo = createItem("tuusinbo")
 				scene.append(tsuusinbo)
-				setItem(tsuusinbo, 20)
+				setItem({ item: tsuusinbo, point: 50 })
 
-				// 令和2020年 元ネタ：https://www.youtube.com/watch?v=7Qry4qTFiIM 令和2020年はバックレません
-				const reiwa = createReiwa2020()
-				scene.append(reiwa)
-				setItem(reiwa, 2020, 200)
+				// カラオケ作成
+				const karaoke = createItem("karaoke")
+				scene.append(karaoke)
+				setItem({ item: karaoke, point: 50 })
+
+				// スクーリング行ってない
+				const schoolingBakkure = createItem("bakkure_1")
+				scene.append(schoolingBakkure)
+				setItem({ item: schoolingBakkure, point: 200 })
+
+				if (time <= 20) {
+					// 残り20秒で令和2020年を表示する
+					// 令和2020年 元ネタ：https://www.youtube.com/watch?v=7Qry4qTFiIM 令和2020年はバックレません
+					const reiwa = createReiwa2020()
+					scene.append(reiwa)
+					setItem({ item: reiwa, point: 2020, speed: 100 })
+				}
 			}
 		}, 1000)
-
 
 		// // 画面をタッチしたとき、SEを鳴らします
 		// scene.pointDownCapture.add(() => {
@@ -148,7 +158,7 @@ export function main(param: GameMainParameterObject): void {
 				// RPGアツマール環境であればランキングを表示します
 				if (param.isAtsumaru) {
 					const boardId = 1
-					window.RPGAtsumaru.experimental.scoreboards.setRecord(boardId, g.game.vars.gameState.score).then(function () {
+					window.RPGAtsumaru.experimental.scoreboards.setRecord(boardId, g.game.vars.gameState.score).then(() => {
 						window.RPGAtsumaru.experimental.scoreboards.display(boardId)
 					})
 				}
@@ -156,7 +166,7 @@ export function main(param: GameMainParameterObject): void {
 			}
 			// カウントダウン処理
 			time -= 1 / g.game.fps
-			timeLabel.text = "TIME: " + Math.ceil(time)
+			timeLabel.text = "時間 : " + Math.ceil(time)
 			timeLabel.invalidate()
 		}
 		scene.update.add(updateHandler)
@@ -165,28 +175,16 @@ export function main(param: GameMainParameterObject): void {
 	})
 	g.game.pushScene(scene)
 
-	// スクーリング（学校）生成
-	const createSchooling = (): g.Sprite => {
+	// 障害物生成関数。引数は画像の名前。
+	const createItem = (path: string): g.Sprite => {
 		// 生成
-		const kousya = new g.Sprite({
+		const item = new g.Sprite({
 			scene: scene,
-			src: scene.assets["irasutoya_kousya"],
+			src: scene.assets[path],
 			x: g.game.width
 		})
-		kousya.y = g.game.random.get(kousya.height, g.game.height) // 高さランダム
-		return kousya
-	}
-
-	// 通信簿　生成
-	const createTsusinbo = (): g.Sprite => {
-		// 生成
-		const tsuusinbo = new g.Sprite({
-			scene: scene,
-			src: scene.assets["tuusinbo"],
-			x: g.game.width
-		})
-		tsuusinbo.y = g.game.random.get(tsuusinbo.height, g.game.height) // 高さランダム
-		return tsuusinbo
+		item.y = g.game.random.get(1, g.game.height) // 高さランダム
+		return item
 	}
 
 	// 令和2020年生成。
@@ -209,24 +207,29 @@ export function main(param: GameMainParameterObject): void {
 	}
 
 	// 障害物を流す、範囲外に行ったら消す、プレイヤーと当たったときの処理。
-	const setItem = (item: g.E, point: number, speed: number = 10) => {
-		item.update.add(() => {
-			item.x -= speed
-			if (item.x < -100) {
+	const setItem = (obj: {
+		item: g.E,
+		speed?: number,
+		point: number
+	}) => {
+		obj.item.update.add(() => {
+			// 指定されてなければ10。
+			obj.item.x -= obj?.speed ?? 10
+			if (obj.item.x < -100) {
 				// 範囲外に行ったら消す
-				item.destroy()
+				obj.item.destroy()
 			}
 			// プレイヤーと当たったら
-			if (g.Collision.intersectAreas(item, player)) {
+			if (g.Collision.intersectAreas(obj.item, player)) {
 				// 加算
-				g.game.vars.gameState.score += point
-				scoreLabel.text = "SCORE: " + g.game.vars.gameState.score
+				g.game.vars.gameState.score += obj.point
+				scoreLabel.text = "スコア : " + g.game.vars.gameState.score
 				scoreLabel.invalidate()
 				// 障害物を消す
-				item.destroy()
+				obj.item.destroy()
 			}
 			// 更新
-			item.modified()
+			obj.item.modified()
 		})
 	}
 
